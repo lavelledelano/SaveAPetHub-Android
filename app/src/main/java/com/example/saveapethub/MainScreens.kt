@@ -163,19 +163,34 @@ fun PlaceholderScreen(title: String) {
 fun ProfileScreen() {
     val user = Supabase.client.auth.currentUserOrNull()
     val scope = rememberCoroutineScope()
+    var page by remember { mutableStateOf<String?>(null) }
 
-    Column(Modifier.fillMaxSize().padding(24.dp)) {
-        Text("My Profile", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Text("Email: ${user?.email ?: "-"}")
-        Spacer(Modifier.height(24.dp))
-        Button(
-            onClick = {
-                scope.launch {
-                    try { Supabase.client.auth.signOut() } catch (_: Exception) {}
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Log out") }
+    BackHandler(enabled = page != null) { page = null }
+
+    when (page) {
+        "abuse" -> ReportAbuseScreen(onBack = { page = null })
+        "surrender" -> SurrenderScreen(onBack = { page = null })
+        else -> Column(Modifier.fillMaxSize().padding(24.dp)) {
+            Text("My Profile", style = MaterialTheme.typography.headlineMedium)
+            Spacer(Modifier.height(12.dp))
+            Text("Email: ${user?.email ?: "-"}")
+            Spacer(Modifier.height(24.dp))
+            OutlinedButton(onClick = { page = "surrender" }, modifier = Modifier.fillMaxWidth()) {
+                Text("Surrender a Pet")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { page = "abuse" }, modifier = Modifier.fillMaxWidth()) {
+                Text("Report Animal Abuse")
+            }
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = {
+                    scope.launch {
+                        try { Supabase.client.auth.signOut() } catch (_: Exception) {}
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Log out") }
+        }
     }
 }
