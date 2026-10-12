@@ -175,6 +175,7 @@ fun ProfileScreen(page: String?, onPageChange: (String?) -> Unit) {
         "surrender" -> SurrenderScreen(onBack = { onPageChange(null) })
         "settings" -> SettingsScreen(onBack = { onPageChange(null) })
         "applications" -> MyApplicationsScreen(onBack = { onPageChange(null) })
+        "help" -> HelpScreen(onBack = { onPageChange(null) })
         else -> Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)
         ) {
@@ -198,6 +199,10 @@ fun ProfileScreen(page: String?, onPageChange: (String?) -> Unit) {
             OutlinedButton(onClick = { onPageChange("abuse") }, modifier = Modifier.fillMaxWidth()) {
                 Text("Report Animal Abuse")
             }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { onPageChange("help") }, modifier = Modifier.fillMaxWidth()) {
+                Text("Help")
+            }
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
@@ -205,7 +210,9 @@ fun ProfileScreen(page: String?, onPageChange: (String?) -> Unit) {
                         try { Supabase.client.auth.signOut() } catch (_: Exception) {}
                     }
                 },
+
                 modifier = Modifier.fillMaxWidth()
+
             ) { Text("Log out") }
         }
     }
