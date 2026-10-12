@@ -27,6 +27,7 @@ fun MainScaffold() {
     var tab by remember { mutableIntStateOf(0) }
     var selectedPet by remember { mutableStateOf<Pet?>(null) }
     var applyingPet by remember { mutableStateOf<Pet?>(null) }
+    var profilePage by remember { mutableStateOf<String?>(null) }
 
     val tabs = listOf(
         "Home" to Icons.Filled.Home,
@@ -36,8 +37,13 @@ fun MainScaffold() {
         "Profile" to Icons.Filled.Person
     )
 
-    BackHandler(enabled = applyingPet != null) { applyingPet = null }
-    BackHandler(enabled = applyingPet == null && selectedPet != null) { selectedPet = null }
+    BackHandler(enabled = applyingPet != null || selectedPet != null || profilePage != null) {
+        when {
+            applyingPet != null -> applyingPet = null
+            selectedPet != null -> selectedPet = null
+            else -> profilePage = null
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -45,7 +51,7 @@ fun MainScaffold() {
                 tabs.forEachIndexed { index, (label, icon) ->
                     NavigationBarItem(
                         selected = tab == index,
-                        onClick = { tab = index; selectedPet = null; applyingPet = null },
+                        onClick = { tab = index; selectedPet = null; applyingPet = null; profilePage = null },
                         icon = { Icon(icon, contentDescription = label) },
                         label = { Text(label) }
                     )
@@ -66,7 +72,7 @@ fun MainScaffold() {
                     1 -> AdoptScreen(onPetClick = { selectedPet = it })
                     2 -> DonateScreen()
                     3 -> VolunteerScreen()
-                    else -> ProfileScreen()
+                    else -> ProfileScreen(page = profilePage, onPageChange = { profilePage = it })
                 }
             }
         }
@@ -160,26 +166,36 @@ fun PlaceholderScreen(title: String) {
 }
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(page: String?, onPageChange: (String?) -> Unit) {
     val user = Supabase.client.auth.currentUserOrNull()
     val scope = rememberCoroutineScope()
-    var page by remember { mutableStateOf<String?>(null) }
-
-    BackHandler(enabled = page != null) { page = null }
 
     when (page) {
-        "abuse" -> ReportAbuseScreen(onBack = { page = null })
-        "surrender" -> SurrenderScreen(onBack = { page = null })
-        else -> Column(Modifier.fillMaxSize().padding(24.dp)) {
+        "abuse" -> ReportAbuseScreen(onBack = { onPageChange(null) })
+        "surrender" -> SurrenderScreen(onBack = { onPageChange(null) })
+        "settings" -> SettingsScreen(onBack = { onPageChange(null) })
+        "applications" -> MyApplicationsScreen(onBack = { onPageChange(null) })
+        else -> Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)
+        ) {
             Text("My Profile", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(12.dp))
             Text("Email: ${user?.email ?: "-"}")
             Spacer(Modifier.height(24.dp))
-            OutlinedButton(onClick = { page = "surrender" }, modifier = Modifier.fillMaxWidth()) {
+
+            OutlinedButton(onClick = { onPageChange("applications") }, modifier = Modifier.fillMaxWidth()) {
+                Text("My Applications")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { onPageChange("settings") }, modifier = Modifier.fillMaxWidth()) {
+                Text("Settings")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { onPageChange("surrender") }, modifier = Modifier.fillMaxWidth()) {
                 Text("Surrender a Pet")
             }
             Spacer(Modifier.height(8.dp))
-            OutlinedButton(onClick = { page = "abuse" }, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { onPageChange("abuse") }, modifier = Modifier.fillMaxWidth()) {
                 Text("Report Animal Abuse")
             }
             Spacer(Modifier.height(24.dp))
