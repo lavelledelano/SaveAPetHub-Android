@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 fun MainScaffold() {
     var tab by remember { mutableIntStateOf(0) }
     var selectedPet by remember { mutableStateOf<Pet?>(null) }
+    var applyingPet by remember { mutableStateOf<Pet?>(null) }
 
     val tabs = listOf(
         "Home" to Icons.Filled.Home,
@@ -35,7 +36,8 @@ fun MainScaffold() {
         "Profile" to Icons.Filled.Person
     )
 
-    BackHandler(enabled = selectedPet != null) { selectedPet = null }
+    BackHandler(enabled = applyingPet != null) { applyingPet = null }
+    BackHandler(enabled = applyingPet == null && selectedPet != null) { selectedPet = null }
 
     Scaffold(
         bottomBar = {
@@ -43,7 +45,7 @@ fun MainScaffold() {
                 tabs.forEachIndexed { index, (label, icon) ->
                     NavigationBarItem(
                         selected = tab == index,
-                        onClick = { tab = index; selectedPet = null },
+                        onClick = { tab = index; selectedPet = null; applyingPet = null },
                         icon = { Icon(icon, contentDescription = label) },
                         label = { Text(label) }
                     )
@@ -53,14 +55,17 @@ fun MainScaffold() {
     ) { padding ->
         Box(Modifier.padding(padding).statusBarsPadding()) {
             val pet = selectedPet
-            if (pet != null) {
-                PetDetailScreen(pet, onBack = { selectedPet = null })
+            val applying = applyingPet
+            if (applying != null) {
+                ApplyScreen(applying, onBack = { applyingPet = null })
+            } else if (pet != null) {
+                PetDetailScreen(pet, onBack = { selectedPet = null }, onApply = { applyingPet = pet })
             } else {
                 when (tab) {
                     0 -> HomeScreen(onBrowse = { tab = 1 })
                     1 -> AdoptScreen(onPetClick = { selectedPet = it })
-                    2 -> PlaceholderScreen("Make a Donation")
-                    3 -> PlaceholderScreen("Volunteer")
+                    2 -> DonateScreen()
+                    3 -> VolunteerScreen()
                     else -> ProfileScreen()
                 }
             }
@@ -124,7 +129,7 @@ fun AdoptScreen(onPetClick: (Pet) -> Unit) {
 }
 
 @Composable
-fun PetDetailScreen(pet: Pet, onBack: () -> Unit) {
+fun PetDetailScreen(pet: Pet, onBack: () -> Unit, onApply: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         TextButton(onClick = onBack) { Text("← Back to pets") }
         Text(pet.name, style = MaterialTheme.typography.headlineMedium)
@@ -137,8 +142,12 @@ fun PetDetailScreen(pet: Pet, onBack: () -> Unit) {
         Spacer(Modifier.height(12.dp))
         Text(pet.description ?: "No description yet.")
         Spacer(Modifier.height(24.dp))
-        Button(onClick = { }, enabled = false, modifier = Modifier.fillMaxWidth()) {
-            Text("Apply to adopt (coming next)")
+        Button(
+            onClick = onApply,
+            enabled = pet.status == "Available",
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (pet.status == "Available") "Apply to adopt" else "Not available")
         }
     }
 }
