@@ -18,6 +18,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import io.github.jan.supabase.auth.providers.Google
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun AppRoot() {
@@ -59,8 +63,14 @@ fun LoginScreen(onGoToRegister: () -> Unit) {
         Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Save-a-Pet Hub", style = MaterialTheme.typography.headlineMedium)
-        Text("Second chances for every tail.", style = MaterialTheme.typography.bodyMedium)
+        Image(
+            painter = painterResource(R.drawable.saph_icon),
+            contentDescription = "Save a Pet Hub logo",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(

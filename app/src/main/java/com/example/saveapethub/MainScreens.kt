@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun MainScaffold() {
@@ -85,6 +89,15 @@ fun HomeScreen(onBrowse: () -> Unit) {
         Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        Image(
+            painter = painterResource(R.drawable.saph_icon),
+            contentDescription = "Save a Pet Hub logo",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
+        Spacer(Modifier.height(16.dp))
         Text("ADOPT PAWS & CLAWS", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
         Text("Discover abandoned pets and give them a permanent, loving home.")
