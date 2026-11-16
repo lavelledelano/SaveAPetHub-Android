@@ -120,7 +120,7 @@ fun AdoptScreen(onPetClick: (Pet) -> Unit) {
     LaunchedEffect(Unit) {
         try {
             pets = Supabase.client.from("pets").select().decodeList<Pet>()
-            android.util.Log.d("PETS", pets.map { "${it.name} -> ${it.imageUrl}" }.toString())
+
         } catch (e: Exception) {
             android.util.Log.e("PETS", "Failed to load pets", e)
             error = "Could not load pets. Please check your internet connection."
