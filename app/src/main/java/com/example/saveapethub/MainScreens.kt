@@ -25,6 +25,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 @Composable
 fun MainScaffold() {
@@ -118,7 +120,9 @@ fun AdoptScreen(onPetClick: (Pet) -> Unit) {
     LaunchedEffect(Unit) {
         try {
             pets = Supabase.client.from("pets").select().decodeList<Pet>()
+            android.util.Log.d("PETS", pets.map { "${it.name} -> ${it.imageUrl}" }.toString())
         } catch (e: Exception) {
+            android.util.Log.e("PETS", "Failed to load pets", e)
             error = "Could not load pets. Please check your internet connection."
         }
         loading = false
@@ -133,6 +137,17 @@ fun AdoptScreen(onPetClick: (Pet) -> Unit) {
             else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(pets) { pet ->
                     Card(Modifier.fillMaxWidth().clickable { onPetClick(pet) }) {
+                        AsyncImage(
+                            model = pet.imageUrl,
+                            contentDescription = pet.name,
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.saph_icon),
+                            error = painterResource(R.drawable.saph_icon),
+                            fallback = painterResource(R.drawable.saph_icon),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                        )
                         Column(Modifier.padding(16.dp)) {
                             Text(pet.name, style = MaterialTheme.typography.titleMedium)
                             Text("${pet.species} • Age: ${pet.ageYears ?: "?"} years • Colour: ${pet.colour ?: "-"}")
@@ -151,6 +166,19 @@ fun AdoptScreen(onPetClick: (Pet) -> Unit) {
 fun PetDetailScreen(pet: Pet, onBack: () -> Unit, onApply: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         TextButton(onClick = onBack) { Text("← Back to pets") }
+        AsyncImage(
+            model = pet.imageUrl,
+            contentDescription = pet.name,
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.saph_icon),
+            error = painterResource(R.drawable.saph_icon),
+            fallback = painterResource(R.drawable.saph_icon),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
+        Spacer(Modifier.height(12.dp))
         Text(pet.name, style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
         Text("Species: ${pet.species}")

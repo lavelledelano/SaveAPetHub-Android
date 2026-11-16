@@ -201,6 +201,7 @@ fun MyApplicationsScreen(onBack: () -> Unit) {
                 pets = Supabase.client.from("pets").select().decodeList<Pet>()
             }
         } catch (e: Exception) {
+            android.util.Log.e("PETS", "Failed to load applications", e)
             error = "Could not load your applications. Please check your internet connection."
         }
         loading = false
